@@ -1,10 +1,13 @@
 import json
 import requests
+import re
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
+from tld import get_tld
 import time
 from common import Common
 import handlers
+
 
 base_url = ""
 page_parameter_name = ""
@@ -15,6 +18,9 @@ stop_condition = False
 
 result_url_tag = ""
 result_url_class = ""
+visit_results_with_different_domain = False
+
+items_to_extract = ""
 
 #number of result pages processed
 counter = 0
@@ -25,22 +31,24 @@ crawl_start_time = datetime.today()
 #loads config file
 def load_config(config_file_path):
     with open(config_file_path) as config_file:
-        data = json.load(config_file)
+        config_file_json = json.load(config_file)
 
-    global base_url, page_parameter_name, first_page, last_page, interval, stop_condition, result_url_tag, result_url_class
-    base_url = data['base_url']
-    page_parameter_name = data['page_parameter_name']
-    first_page = data['first_page']
+    global base_url, page_parameter_name, first_page, last_page, interval, stop_condition, result_url_tag, result_url_class, items_to_extract, visit_results_with_different_domain
+    base_url = config_file_json['base_url']
+    page_parameter_name = config_file_json['page_parameter_name']
+    first_page = config_file_json['first_page']
     #if last_page is 0 and there is no stop condition the crawler will run till there is no results on page
-    last_page = data['last_page']
-    interval = data['interval']
+    last_page = config_file_json['last_page']
+    interval = config_file_json['interval']
     #if stop condition is set to true the stop_condition_handler function will run at the end of crawl of each page
-    stop_condition = data['stop_condition']
-    result_url_tag = data['result_url_tag']
-    result_url_class = data['result_url_class']
+    stop_condition = config_file_json['stop_condition']
+    result_url_tag = config_file_json['result_url_tag']
+    result_url_class = config_file_json['result_url_class']
+    items_to_extract = config_file_json['items_to_extract']
+    visit_results_with_different_domain = config_file_json['visit_results_with_different_domain']
 
 def crawl():
-    global base_url, page_parameter_name, first_page, last_page, interval, stop_condition, result_url_tag, result_url_class, counter
+    global last_page, counter
     stop_condition_reached = False
     current_page = first_page
     #if last page was 0 (not defined) we set it to large number so the loop condition makes sense
@@ -61,6 +69,10 @@ def crawl():
             #it can modify the url or set it to empty string to skip the result
             #by default it just returnes the ["href"] of the result_url
             result_url_href = handlers.result_url_handler(result_url)
+            #now check if the results page is on domain other thatn the one we are crawling
+            if visit_results_with_different_domain == False:
+                if get_tld(result_url_href, as_object=True).domain != get_tld(base_url, as_object=True).domain:
+                    continue
             if result_url_href != "":
                 result_response = requests.get(result_url_href, headers = {"User-Agent" : Common.get_user_agent()})
                 result_response_text = result_response.text
@@ -80,7 +92,37 @@ def crawl():
         current_page += 1
 
 def extract_data(result_soup):
-    print("shit")
+    for item in items_to_extract:
+        #two basic types of filters are supported
+        #first: tag name with specific attributes
+        if item["filter_type"] == "tag":
+            try:
+                #some objects created by bs4 have "content"
+                print(result_soup.find(item["html_tag_name"], {item["html_tag_attr_name"] : item["html_tag_attr_value"]})["content"])
+                continue
+            except:
+                pass
+            try:
+                #and some have .text
+                print(result_soup.find(item["html_tag_name"], {item["html_tag_attr_name"] : item["html_tag_attr_value"]}).text)
+                continue
+            except:
+                pass
+            print("Item '" + item["name"] + "' not found")
+        #second: tag name with regex on string inside it
+        if item["filter_type"] == "regex":
+            try:
+                print(result_soup.find(item["html_tag_name"], string=re.compile(item["regex_string"])).text)
+                continue
+            except:
+                pass
+            try:
+                print(result_soup.find(item["html_tag_name"], string=re.compile(item["regex_string"])).text)
+                continue
+            except:
+                pass
+            print("Item '" + item["name"] + "' not found")
+
 
 def main(config_file_path):
     load_config(config_file_path)
