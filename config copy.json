@@ -1,11 +1,11 @@
 {
-    "base_url": "https://www.ebay.com/b/BMW-Cars-and-Trucks/6001/bn_24017016?rt=nc&_sop=10",
-    "page_parameter_name": "_pgn",
+    "base_url": "https://www.olx.pl/motoryzacja/samochody/?",
+    "page_parameter_name": "page",
     "first_page": 1,
-    "last_page": 3,
+    "last_page": 1,
     "interval": 0,
     "result_url_tag": "a",
-    "result_url_class": "s-item__link",
+    "result_url_class": "marginright5 link linkWithHash detailsLink",
     "visit_results_with_different_domain" : false,
     "output_file" : "output.json",
     "verbose" : true,
@@ -29,14 +29,20 @@
         {
             "filter_type" : "tag",
             "name": "price",
-            "html_tag_name": "span",
-            "html_tag_attr_name": "id",
-            "html_tag_attr_value": "prcIsum"
+            "html_tag_name": "strong",
+            "html_tag_attr_name": "class",
+            "html_tag_attr_value": "pricelabel__value"
+        },
+        {
+            "filter_type" : "regex",
+            "name": "date_src",
+            "html_tag_name": "strong",
+            "regex_string": "^o "
         },
         {
             "filter_type" : "sieve",
-            "name": "vehicle_parameter",
-            "sieve_selector": "html body div.tabbable div.tab-content-m div.vi-VR-tabCnt div.section table tr td span"
+            "name": "offer_details",
+            "sieve_selector": "html body div section div#offer_active div#offerdescription div ul li"
         }
     ]
 }
