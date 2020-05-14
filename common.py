@@ -2,7 +2,6 @@ import random
 
 class Common:
 
-    #define User-Agent header (otomoto responds with 403 when default requests lib agent is used)
     user_agent = [
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36",
         "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.85 Safari/537.36",
@@ -46,97 +45,3 @@ class Common:
     @staticmethod
     def get_user_agent():
         return random.choice(Common.user_agent)
-
-
-    def param_switcher(self, offer_source, caroffer, param_name, param_value):
-        if param_name.find(offer_source.category) != -1:
-            caroffer.category = param_value
-            return
-        if param_name.find(offer_source.manufacturer) != -1:
-            caroffer.manufacturer = param_value
-            return
-        if param_name.find(offer_source.model_name) != -1:
-            caroffer.model_name = param_value
-            return
-        if param_name.find(offer_source.model_version) != -1:
-            caroffer.model_version = param_value
-            return
-        if param_name.find(offer_source.year) != -1:
-            caroffer.year = int(param_value)
-            return
-        if param_name.find(offer_source.odometer) != -1:
-            #remove "km" and spaces before storing
-            caroffer.odometer = int(param_value[:-2].replace(" ", ""))
-            return
-        if param_name.find(offer_source.juice) != -1:
-            caroffer.juice = param_value
-            return
-        if param_name.find(offer_source.engine) != -1:
-            #remove "cm3" and spaces before storing
-            #for allegro there are 4 characters to remov coz the 3 is in superscript
-            caroffer.engine = param_value[:-3].replace(" ", "")
-            if offer_source.source_name != "otomoto":
-                caroffer.engine = int(param_value[:-4].replace(" ", ""))
-            else:
-                caroffer.engine = int(param_value[:-3].replace(" ", ""))
-            return
-        if param_name.find(offer_source.power) != -1:
-            #remove "KM" and spaces before stroring
-            caroffer.power = int(param_value[:-2].replace(" ", ""))
-            return
-        if param_name.find(offer_source.transmission) != -1:
-            caroffer.transmission = param_value
-            return
-        if param_name.find(offer_source.drivetrain_layout) != -1:
-            caroffer.drivetrain_layout = param_value
-            return
-        if param_name.find(offer_source.body_type) != -1:
-            caroffer.body_type = param_value
-            return
-        if param_name.find(offer_source.color) != -1:
-            caroffer.color = param_value
-            return
-        if param_name.find(offer_source.left_hand_drive) != -1:
-            if param_value == "Tak" or param_value == "po prawej":
-                caroffer.left_hand_drive = True
-            else:
-                caroffer.left_hand_drive = False
-            return
-
-    def english_month(self, date):
-        eng_date = date.replace("stycznia", "January")
-        if date != eng_date :
-            return eng_date
-        eng_date = date.replace("lutego", "February")
-        if date != eng_date :
-            return eng_date
-        eng_date = date.replace("marca", "March")
-        if date != eng_date :
-            return eng_date
-        eng_date = date.replace("kwietnia", "April")
-        if date != eng_date :
-            return eng_date
-        eng_date = date.replace("maja", "May")
-        if date != eng_date :
-            return eng_date
-        eng_date = date.replace("czerwca", "June")
-        if date != eng_date :
-            return eng_date
-        eng_date = date.replace("lipca", "July")
-        if date != eng_date :
-            return eng_date
-        eng_date = date.replace("sierpnia", "August")
-        if date != eng_date :
-            return eng_date
-        eng_date = date.replace("września", "September")
-        if date != eng_date :
-            return eng_date
-        eng_date = date.replace("października", "October")
-        if date != eng_date :
-            return eng_date
-        eng_date = date.replace("listopada", "Novermber")
-        if date != eng_date :
-            return eng_date
-        eng_date = date.replace("grudnia", "December")
-        if date != eng_date :
-            return eng_date

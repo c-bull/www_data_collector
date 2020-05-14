@@ -35,6 +35,12 @@
             "name": "date_src",
             "html_tag_name": "strong",
             "regex_string": "^o "
+        },
+        {
+            "filter_type" : "sieve",
+            "name": "offer_details",
+            "sieve_selector": "html body div section div#offer_active div#offerdescription div ul li"
         }
     ]
 }
+
