@@ -12,10 +12,14 @@ Alternatively, www_data_collector can be extended by adding code to the three ha
 
 # Usage example
 Let's say we want to collect data of bimmers that pop up on ebay. We first have to find the URL, so we search BMWs on ebay and sort by "newly listed".
+
 ![Alt text](/readme_img/img1.png)
+
 Next, we have to go to the next page of the results to find out the page_parameter_name. In this case it is "_pgn".
+
 ![Alt text](/readme_img/img2.png)
-So, our config file looks like this:
+
+So far, our config file looks like this:
 ```
 {
     "base_url": "https://www.ebay.com/b/BMW-Cars-and-Trucks/6001/bn_24017016?rt=nc&_sop=10",
@@ -23,7 +27,9 @@ So, our config file looks like this:
 }
 ```
 Now, let's inspect the result hyperlink and see what is the CSS class name of the <a> tag. In this case it is "s-item__link".
+
 ![Alt text](/readme_img/img3.png)
+
 Config file:
 ```
 {
@@ -34,7 +40,9 @@ Config file:
 }
 ```
 We visit any page from the result list. We now have to decide what data is to be collected. We will start with offer title and link to image. This info is usually present in meta tags. BTW meta tags often have content attribute define. To extract value of this attribute we can use "attr_to_extract" option in the config file.
+
 ![Alt text](/readme_img/img4.png)
+
 We are adding two "items_to_extract" with filter type "tag" to our config:
 ```
 "items_to_extract": [
@@ -57,7 +65,9 @@ We are adding two "items_to_extract" with filter type "tag" to our config:
 ]
 ```
 Let's collect the price as well. It is rendered as a span tag with id "prcIsum", which should be unique in the scope of this page.
+
 ![Alt text](/readme_img/img4.png)
+
 Adding price item:
 ```
 "items_to_extract": [
@@ -71,9 +81,13 @@ Adding price item:
 ]
 ```
 We are also interested in the vehicle specification. It is presented in a table below. 
+
 ![Alt text](/readme_img/img6.png)
+
 Since the parameters listed in the table do not have uniqie tags in the HTML document, we will use a Soup Sieve. It basically tells the program how to traverse the document to access the elements we are interested in. At the bottom of the developers tools there is a path to the tag we are currently inspecting. Our job is to convert it to a sieve_selector.
+
 ![Alt text](/readme_img/img7.png)
+
 Adding sieve item to config:
 ```
 "items_to_extract": [
