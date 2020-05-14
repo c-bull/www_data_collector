@@ -4,10 +4,11 @@
     "first_page": 1,
     "last_page": 1,
     "interval": 0,
-    "stop_condition": true,
     "result_url_tag": "a",
     "result_url_class": "marginright5 link linkWithHash detailsLink",
     "visit_results_with_different_domain" : false,
+    "output_file" : "output.json",
+    "verbose" : true,
     "items_to_extract": [
         {
             "filter_type" : "tag",
