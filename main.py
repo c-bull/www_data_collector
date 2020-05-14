@@ -16,7 +16,7 @@ counter = 0
 #datetime of the crawler initiation
 crawl_start_time = datetime.today()
 
-output = []
+output = {}
 
 #loads config file
 def load_config(config_file_path):
@@ -107,12 +107,19 @@ def crawl():
             if visit_results_with_different_domain == False:
                 if get_tld(result_url_href, as_object=True).domain != get_tld(base_url, as_object=True).domain:
                     continue
+            if verbose:
+                print(result_url_href)
+            #adding result to output
+            current_uuid = uuid.uuid4().__str__()
+            output[current_uuid] = {"url":result_url_href}
             if result_url_href != "":
                 result_response = requests.get(result_url_href, headers = {"User-Agent" : Common.get_user_agent()})
                 result_response_text = result_response.text
                 result_response_text = " ".join(result_response_text.split())
                 result_soup = BeautifulSoup(result_response_text, features="html.parser")
-                extract_data(result_soup)
+                extract_data(result_soup, current_uuid)
+                if verbose:
+                    print()
                 #result page processing can be extended by adding code to the result_page_processing_handler function
                 #by default is does not do anything
                 handlers.result_page_processing_handler(result_soup)
@@ -125,7 +132,7 @@ def crawl():
             print("Page " + str(current_page) + " crawled.")
         current_page += 1
 
-def extract_data(result_soup):
+def extract_data(result_soup, current_uuid):
     global output
     for item in items_to_extract:
         #three types of filters are supported: tag, regex, sieve
@@ -135,15 +142,19 @@ def extract_data(result_soup):
             #this requires specifing attr_to_extract in the config file
             if "attr_to_extract" in item:
                 try:
+                    value = result_soup.find(item["html_tag_name"], {item["html_tag_attr_name"] : item["html_tag_attr_value"]})[item["attr_to_extract"]]
                     if verbose:
-                        print(result_soup.find(item["html_tag_name"], {item["html_tag_attr_name"] : item["html_tag_attr_value"]})[item["attr_to_extract"]])
+                        print(value)
+                    output[current_uuid][item["name"]] = value
                     continue
                 except:
                     pass
             #by default we are trying to collect .text inside a tag
             try:
+                value = result_soup.find(item["html_tag_name"], {item["html_tag_attr_name"] : item["html_tag_attr_value"]}).text
                 if verbose:
-                    print(result_soup.find(item["html_tag_name"], {item["html_tag_attr_name"] : item["html_tag_attr_value"]}).text)
+                    print(value)
+                output[current_uuid][item["name"]] = value
                 continue
             except:
                 pass
@@ -155,15 +166,19 @@ def extract_data(result_soup):
             #this requires specifing attr_to_extract in the config file
             if "attr_to_extract" in item:
                 try:
+                    value = result_soup.find(item["html_tag_name"], string=re.compile(item["regex_string"]))[item["attr_to_extract"]]
                     if verbose:
-                        print(result_soup.find(item["html_tag_name"], string=re.compile(item["regex_string"]))[item["attr_to_extract"]])
+                        print(value)
+                    output[current_uuid][item["name"]] = value
                     continue
                 except:
                     pass
             #by default we are trying to collect .text inside a tag
             try:
+                value = result_soup.find(item["html_tag_name"], string=re.compile(item["regex_string"])).text
                 if verbose:
-                    print(result_soup.find(item["html_tag_name"], string=re.compile(item["regex_string"])).text)
+                    print(value)
+                output[current_uuid][item["name"]] = value
                 continue
             except:
                 pass
@@ -175,17 +190,19 @@ def extract_data(result_soup):
             #this requires specifing attr_to_extract in the config file
             if "attr_to_extract" in item:
                 try:
-                    for found_item in result_soup.select(item["sieve_selector"]):
+                    for i, found_item in enumerate(result_soup.select(item["sieve_selector"])):
                         if verbose:
                             print(found_item[item["attr_to_extract"]])
+                        output[current_uuid][item["name"] + str(i)] = found_item[item["attr_to_extract"]]
                     continue
                 except:
                     pass
             #by default we are trying to collect .text inside a tag
             try:
-                for found_item in result_soup.select(item["sieve_selector"]):
+                for i, found_item in enumerate(result_soup.select(item["sieve_selector"])):
                     if verbose:
                         print(found_item.text)
+                    output[current_uuid][item["name"] + str(i)] = found_item.text
                 continue
             except:
                 pass
@@ -194,7 +211,14 @@ def extract_data(result_soup):
 
 def main(config_file_path):
     load_config(config_file_path)
+    output["base_url"] = base_url
+    output["page_parameter_name"] = page_parameter_name
+    output["firs_page"] = first_page
+    output["last_page"] = last_page
+    output["start_time"] = crawl_start_time.__str__()
     crawl()
+    with open(output_file, 'w') as f:
+        json.dump(output, f)
     if verbose:
         print("Finished. Crawled " + str(counter) + " result pages.")
 
