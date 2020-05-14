@@ -96,14 +96,16 @@ def extract_data(result_soup):
         #three types of filters are supported: tag, regex, sieve
         #first: tag name with specific attributes.
         if item["filter_type"] == "tag":
+            #check if the value to be collected is a tag attribute
+            #this requires specifing attr_to_extract in the config file
+            if "attr_to_extract" in item:
+                try:
+                    print(result_soup.find(item["html_tag_name"], {item["html_tag_attr_name"] : item["html_tag_attr_value"]})[item["attr_to_extract"]])
+                    continue
+                except:
+                    pass
+            #by default we are trying to collect .text inside a tag
             try:
-                #some objects created by bs4 have "content"
-                print(result_soup.find(item["html_tag_name"], {item["html_tag_attr_name"] : item["html_tag_attr_value"]})["content"])
-                continue
-            except:
-                pass
-            try:
-                #and some have .text
                 print(result_soup.find(item["html_tag_name"], {item["html_tag_attr_name"] : item["html_tag_attr_value"]}).text)
                 continue
             except:
@@ -111,11 +113,15 @@ def extract_data(result_soup):
             print("Item '" + item["name"] + "' not found")
         #second: tag name with regex. regex is applied to string inside a tag.
         if item["filter_type"] == "regex":
-            try:
-                print(result_soup.find(item["html_tag_name"], string=re.compile(item["regex_string"])).text)
-                continue
-            except:
-                pass
+            #check if the value to be collected is a tag attribute
+            #this requires specifing attr_to_extract in the config file
+            if "attr_to_extract" in item:
+                try:
+                    print(result_soup.find(item["html_tag_name"], string=re.compile(item["regex_string"]))[item["attr_to_extract"]])
+                    continue
+                except:
+                    pass
+            #by default we are trying to collect .text inside a tag
             try:
                 print(result_soup.find(item["html_tag_name"], string=re.compile(item["regex_string"])).text)
                 continue
@@ -124,12 +130,16 @@ def extract_data(result_soup):
             print("Item '" + item["name"] + "' not found")
         #third: sieve selector consisting series of tags used to traverse the document.
         if item["filter_type"] == "sieve":
-            try:
-                for found_item in result_soup.select(item["sieve_selector"]):
-                    print(found_item["content"])
-                continue
-            except:
-                pass
+            #check if the value to be collected is a tag attribute
+            #this requires specifing attr_to_extract in the config file
+            if "attr_to_extract" in item:
+                try:
+                    for found_item in result_soup.select(item["sieve_selector"]):
+                        print(found_item[item["attr_to_extract"]])
+                    continue
+                except:
+                    pass
+            #by default we are trying to collect .text inside a tag
             try:
                 for found_item in result_soup.select(item["sieve_selector"]):
                     print(found_item.text)

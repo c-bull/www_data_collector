@@ -14,14 +14,16 @@
             "name": "title",
             "html_tag_name": "meta",
             "html_tag_attr_name": "property",
-            "html_tag_attr_value": "og:title"
+            "html_tag_attr_value": "og:title",
+            "attr_to_extract" : "content"
         },
         {
             "filter_type" : "tag",
             "name": "image",
             "html_tag_name": "meta",
             "html_tag_attr_name": "property",
-            "html_tag_attr_value": "og:image"
+            "html_tag_attr_value": "og:image",
+            "attr_to_extract" : "content"
         },
         {
             "filter_type" : "tag",
